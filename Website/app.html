@@ -1,0 +1,791 @@
+<!DOCTYPE html>
+<html lang="en" class="scroll-smooth">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>UNMASKED | The Last Mask</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.2/gsap.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.2/ScrollTrigger.min.js"></script>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,300;0,400;0,600;1,400&family=Inter:wght@200;300;400;500&display=swap" rel="stylesheet">
+    
+    <style>
+        :root {
+            --void: #050505;
+            --ash: #1a1a1a;
+            --bone: #e0e0d0;
+            --fog: #8a8a8a;
+            --hollow: #c0c0c0;
+            --fractured: #4a0404;
+            --wailing: #0a0a1a;
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            background-color: var(--void);
+            color: var(--bone);
+            font-family: 'Inter', sans-serif;
+            overflow-x: hidden;
+            cursor: none;
+        }
+
+        .font-display {
+            font-family: 'Cormorant Garamond', serif;
+        }
+
+        /* Custom Cursor */
+        .cursor {
+            width: 20px;
+            height: 20px;
+            border: 1px solid rgba(224, 224, 208, 0.5);
+            border-radius: 50%;
+            position: fixed;
+            pointer-events: none;
+            z-index: 9999;
+            transition: transform 0.1s;
+            mix-blend-mode: difference;
+        }
+
+        .cursor-follower {
+            width: 40px;
+            height: 40px;
+            background: radial-gradient(circle, rgba(224,224,208,0.1) 0%, transparent 70%);
+            border-radius: 50%;
+            position: fixed;
+            pointer-events: none;
+            z-index: 9998;
+            transition: transform 0.3s ease-out;
+        }
+
+        /* Noise Overlay */
+        .noise {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            pointer-events: none;
+            z-index: 9000;
+            opacity: 0.03;
+            background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 200 200' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noiseFilter'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.65' numOctaves='3' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noiseFilter)'/%3E%3C/svg%3E");
+        }
+
+        /* Vignette */
+        .vignette {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            pointer-events: none;
+            z-index: 8999;
+            background: radial-gradient(circle, transparent 50%, rgba(0,0,0,0.8) 100%);
+        }
+
+        /* Breathing Animation */
+        @keyframes breathe {
+            0%, 100% { transform: scale(1) translateY(0); opacity: 0.8; }
+            50% { transform: scale(1.02) translateY(-5px); opacity: 1; }
+        }
+
+        .breathing {
+            animation: breathe 8s ease-in-out infinite;
+        }
+
+        /* Glitch Effect */
+        .glitch {
+            position: relative;
+        }
+
+        .glitch::before,
+        .glitch::after {
+            content: attr(data-text);
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: var(--void);
+        }
+
+        .glitch::before {
+            left: 2px;
+            text-shadow: -2px 0 #ff0000;
+            clip: rect(44px, 450px, 56px, 0);
+            animation: glitch-anim 5s infinite linear alternate-reverse;
+        }
+
+        .glitch::after {
+            left: -2px;
+            text-shadow: -2px 0 #00ff00;
+            clip: rect(44px, 450px, 56px, 0);
+            animation: glitch-anim2 5s infinite linear alternate-reverse;
+        }
+
+        @keyframes glitch-anim {
+            0% { clip: rect(30px, 9999px, 15px, 0); }
+            20% { clip: rect(85px, 9999px, 95px, 0); }
+            40% { clip: rect(10px, 9999px, 65px, 0); }
+            60% { clip: rect(75px, 9999px, 25px, 0); }
+            80% { clip: rect(50px, 9999px, 85px, 0); }
+            100% { clip: rect(20px, 9999px, 45px, 0); }
+        }
+
+        @keyframes glitch-anim2 {
+            0% { clip: rect(65px, 9999px, 95px, 0); }
+            20% { clip: rect(25px, 9999px, 85px, 0); }
+            40% { clip: rect(90px, 9999px, 15px, 0); }
+            60% { clip: rect(35px, 9999px, 75px, 0); }
+            80% { clip: rect(15px, 9999px, 55px, 0); }
+            100% { clip: rect(80px, 9999px, 35px, 0); }
+        }
+
+        /* Mask Card Styles */
+        .mask-card {
+            background: linear-gradient(135deg, rgba(26,26,26,0.8) 0%, rgba(10,10,10,0.9) 100%);
+            border: 1px solid rgba(224, 224, 208, 0.1);
+            transition: all 0.5s cubic-bezier(0.4, 0, 0.2, 1);
+            position: relative;
+            overflow: hidden;
+        }
+
+        .mask-card::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: -100%;
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(90deg, transparent, rgba(255,255,255,0.05), transparent);
+            transition: left 0.7s;
+        }
+
+        .mask-card:hover::before {
+            left: 100%;
+        }
+
+        .mask-card:hover {
+            border-color: rgba(224, 224, 208, 0.3);
+            transform: translateY(-5px);
+            box-shadow: 0 20px 40px rgba(0,0,0,0.8);
+        }
+
+        .mask-hollow:hover { border-color: rgba(192, 192, 192, 0.5); box-shadow: 0 0 30px rgba(192,192,192,0.1); }
+        .mask-fractured:hover { border-color: rgba(138, 0, 0, 0.5); box-shadow: 0 0 30px rgba(138,0,0,0.2); }
+        .mask-wailing:hover { border-color: rgba(20, 20, 50, 0.5); box-shadow: 0 0 30px rgba(20,20,50,0.2); }
+
+        /* Text Reveal */
+        .reveal-text {
+            clip-path: polygon(0 0, 100% 0, 100% 100%, 0% 100%);
+        }
+
+        .char {
+            display: inline-block;
+            transform: translateY(100%);
+            opacity: 0;
+            transition: transform 0.5s, opacity 0.5s;
+        }
+
+        .char.visible {
+            transform: translateY(0);
+            opacity: 1;
+        }
+
+        /* Corridor Grid Background */
+        .corridor-grid {
+            background-image: 
+                linear-gradient(rgba(224, 224, 208, 0.03) 1px, transparent 1px),
+                linear-gradient(90deg, rgba(224, 224, 208, 0.03) 1px, transparent 1px);
+            background-size: 50px 50px;
+            position: absolute;
+            width: 200%;
+            height: 200%;
+            top: -50%;
+            left: -50%;
+            transform: perspective(500px) rotateX(60deg);
+            animation: grid-move 20s linear infinite;
+            pointer-events: none;
+            opacity: 0.3;
+        }
+
+        @keyframes grid-move {
+            0% { transform: perspective(500px) rotateX(60deg) translateY(0); }
+            100% { transform: perspective(500px) rotateX(60deg) translateY(50px); }
+        }
+
+        /* Particle Dust */
+        .dust {
+            position: absolute;
+            width: 2px;
+            height: 2px;
+            background: rgba(224, 224, 208, 0.3);
+            border-radius: 50%;
+            pointer-events: none;
+            animation: float 10s infinite ease-in-out;
+        }
+
+        @keyframes float {
+            0%, 100% { transform: translateY(0) translateX(0); opacity: 0; }
+            10% { opacity: 1; }
+            90% { opacity: 1; }
+            100% { transform: translateY(-100vh) translateX(50px); opacity: 0; }
+        }
+
+        /* Scrollbar */
+        ::-webkit-scrollbar {
+            width: 8px;
+        }
+        ::-webkit-scrollbar-track {
+            background: var(--void);
+        }
+        ::-webkit-scrollbar-thumb {
+            background: var(--ash);
+            border-radius: 4px;
+        }
+        ::-webkit-scrollbar-thumb:hover {
+            background: var(--fog);
+        }
+
+        /* Selection */
+        ::selection {
+            background: rgba(224, 224, 208, 0.2);
+            color: var(--bone);
+        }
+
+        /* Audio Visualizer Bars (Visual only) */
+        .audio-bar {
+            width: 2px;
+            background: linear-gradient(to top, transparent, var(--bone));
+            animation: audio-dance 1.2s ease-in-out infinite;
+        }
+
+        @keyframes audio-dance {
+            0%, 100% { height: 10px; opacity: 0.3; }
+            50% { height: 40px; opacity: 0.8; }
+        }
+    </style>
+</head>
+<body class="antialiased selection:bg-white/20 selection:text-white">
+
+    <!-- Custom Cursor -->
+    <div class="cursor hidden md:block"></div>
+    <div class="cursor-follower hidden md:block"></div>
+
+    <!-- Atmospheric Overlays -->
+    <div class="noise"></div>
+    <div class="vignette"></div>
+
+    <!-- Navigation -->
+    <nav class="fixed top-0 left-0 w-full z-50 px-6 py-6 flex justify-between items-center mix-blend-difference">
+        <div class="text-xs tracking-[0.3em] uppercase opacity-70 hover:opacity-100 transition-opacity cursor-pointer font-display text-lg">
+            Unmasked
+        </div>
+        <div class="flex gap-8 text-xs tracking-widest uppercase">
+            <a href="#masks" class="hover:text-white/50 transition-colors">The Masks</a>
+            <a href="#truth" class="hover:text-white/50 transition-colors">The Truth</a>
+            <a href="https://github.com/Vishesh1305/Unmasked" target="_blank" class="hover:text-white/50 transition-colors flex items-center gap-2">
+                <span>GitHub</span>
+                <svg class="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 6H6a2 2 0 00-2 2v10a2 2 0 002 2h10a2 2 0 002-2v-4M14 4h6m0 0v6m0-6L10 14"/></svg>
+            </a>
+        </div>
+    </nav>
+
+    <!-- Hero Section -->
+    <section class="relative min-h-screen flex items-center justify-center overflow-hidden">
+        <!-- Background Effects -->
+        <div class="corridor-grid"></div>
+        <div class="absolute inset-0 bg-gradient-to-b from-black via-transparent to-black z-10"></div>
+        
+        <!-- Floating Dust Particles -->
+        <div id="dust-container" class="absolute inset-0 pointer-events-none z-20"></div>
+
+        <!-- Content -->
+        <div class="relative z-30 text-center px-6 max-w-5xl mx-auto">
+            <div class="mb-6 overflow-hidden">
+                <p class="text-xs md:text-sm tracking-[0.5em] uppercase opacity-60 animate-pulse font-light">
+                    Global Game Jam 2026 • Theme: Masks
+                </p>
+            </div>
+            
+            <h1 class="font-display text-6xl md:text-8xl lg:text-9xl mb-8 leading-none tracking-tight breathing select-none">
+                <span class="block glitch" data-text="UNMASKED">UNMASKED</span>
+                <span class="block text-2xl md:text-4xl mt-4 italic opacity-60 font-light tracking-wide">The Last Mask</span>
+            </h1>
+
+            <div class="max-w-2xl mx-auto mb-12 space-y-6 text-sm md:text-base leading-relaxed opacity-80 font-light">
+                <p class="reveal-text text-lg md:text-xl italic border-l-2 border-white/20 pl-6 text-left">
+                    "Is this the right moment to wear this mask?"
+                </p>
+                <p class="text-justify">
+                    You awaken in an impossibly vast maze of repeating corridors. Three ancient masks rest before you—each granting a single-use power, each consuming a piece of your identity forever. Escape is possible, but every choice is irreversible.
+                </p>
+            </div>
+
+            <div class="flex flex-col md:flex-row gap-4 justify-center items-center">
+                <a href="https://github.com/Vishesh1305/Unmasked" target="_blank" 
+                   class="group relative px-8 py-4 border border-white/20 overflow-hidden transition-all hover:border-white/50 bg-black/50 backdrop-blur-sm">
+                    <span class="relative z-10 text-xs tracking-[0.3em] uppercase">View on GitHub</span>
+                    <div class="absolute inset-0 bg-white/5 translate-y-full group-hover:translate-y-0 transition-transform duration-300"></div>
+                </a>
+                <button onclick="document.getElementById('masks').scrollIntoView({behavior: 'smooth'})" 
+                        class="px-8 py-4 text-xs tracking-[0.3em] uppercase opacity-60 hover:opacity-100 transition-opacity flex items-center gap-2">
+                    <span>Explore</span>
+                    <svg class="w-4 h-4 animate-bounce" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1" d="M19 14l-7 7m0 0l-7-7m7 7V3"/></svg>
+                </button>
+            </div>
+        </div>
+
+        <!-- Scroll Indicator -->
+        <div class="absolute bottom-10 left-1/2 -translate-x-1/2 z-30 flex flex-col items-center gap-2 opacity-50">
+            <div class="w-px h-16 bg-gradient-to-b from-transparent via-white to-transparent"></div>
+        </div>
+    </section>
+
+    <!-- The Truth Section -->
+    <section id="truth" class="relative py-32 px-6 bg-gradient-to-b from-transparent to-black/50">
+        <div class="max-w-4xl mx-auto">
+            <div class="grid md:grid-cols-2 gap-16 items-center">
+                <div class="space-y-6">
+                    <h2 class="font-display text-4xl md:text-5xl mb-8 leading-tight">
+                        This is not a hospital.<br>
+                        <span class="text-white/40 italic">It is a containment.</span>
+                    </h2>
+                    <div class="space-y-4 text-sm leading-loose opacity-80 font-light text-justify">
+                        <p>
+                            The corridors are endless because the mind is looping. The maze exists to test those who refuse to let go—refused treatment, refused to forget, refused to accept loss.
+                        </p>
+                        <p>
+                            The architecture defies logic: halls stretch into darkness, doors lead to rooms already visited, walls shift when unobserved. This is not a place built by human hands.
+                        </p>
+                        <p class="border-l-2 border-red-900/50 pl-4 text-red-200/60">
+                            The system did not heal you. It contained you.
+                        </p>
+                    </div>
+                </div>
+                <div class="relative">
+                    <div class="aspect-[3/4] border border-white/10 bg-black/40 backdrop-blur p-8 relative overflow-hidden group">
+                        <div class="absolute inset-0 bg-gradient-to-br from-white/5 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-700"></div>
+                        <div class="h-full flex flex-col justify-between relative z-10">
+                            <div class="text-xs tracking-widest opacity-50">PATIENT FILE</div>
+                            <div class="space-y-2">
+                                <div class="h-px w-full bg-white/10"></div>
+                                <div class="flex justify-between text-xs opacity-40">
+                                    <span>STATUS</span>
+                                    <span>UNSTABLE</span>
+                                </div>
+                                <div class="h-px w-full bg-white/10"></div>
+                                <div class="flex justify-between text-xs opacity-40">
+                                    <span>CONDITION</span>
+                                    <span>DISPATCHED</span>
+                                </div>
+                                <div class="h-px w-full bg-white/10"></div>
+                            </div>
+                            <div class="font-display text-2xl italic opacity-60">
+                                "You may leave. You are not cured."
+                            </div>
+                        </div>
+                        <!-- Scanline effect -->
+                        <div class="absolute inset-0 bg-gradient-to-b from-transparent via-white/5 to-transparent h-2 w-full animate-[scan_3s_linear_infinite] pointer-events-none"></div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- The Three Masks Section -->
+    <section id="masks" class="relative py-32 px-6">
+        <div class="max-w-6xl mx-auto">
+            <div class="text-center mb-24">
+                <h2 class="font-display text-5xl md:text-7xl mb-6">The Three Masks</h2>
+                <p class="text-sm tracking-[0.2em] uppercase opacity-60 max-w-xl mx-auto">
+                    Each mask is a coping mechanism. Each use is a piece of yourself surrendered permanently.
+                </p>
+            </div>
+
+            <div class="grid md:grid-cols-3 gap-8">
+                <!-- Hollow Mask -->
+                <div class="mask-card mask-hollow p-8 md:p-12 flex flex-col h-full group">
+                    <div class="mb-8 relative">
+                        <div class="w-24 h-24 mx-auto rounded-full border border-white/20 flex items-center justify-center relative overflow-hidden bg-gradient-to-b from-white/5 to-transparent">
+                            <div class="absolute inset-0 bg-white/10 translate-y-full group-hover:translate-y-0 transition-transform duration-500"></div>
+                            <svg class="w-10 h-10 opacity-80 relative z-10" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"/>
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z"/>
+                            </svg>
+                        </div>
+                        <div class="absolute -bottom-2 left-1/2 -translate-x-1/2 text-[10px] tracking-widest opacity-40">SIGHT</div>
+                    </div>
+                    
+                    <h3 class="font-display text-3xl mb-4 text-center">The Hollow Mask</h3>
+                    <div class="w-12 h-px bg-white/20 mx-auto mb-6"></div>
+                    
+                    <div class="flex-1 space-y-4 text-sm leading-relaxed opacity-80">
+                        <p class="italic text-white/60 text-center mb-4">"If I just knew the way out..."</p>
+                        <p>Grants <span class="text-white">TRUE SIGHT</span> for 15 seconds. Reveals hidden paths, correct doors, and invisible clues.</p>
+                        <ul class="space-y-2 text-xs opacity-60 mt-4">
+                            <li class="flex items-center gap-2">
+                                <span class="w-1 h-1 bg-white/40 rounded-full"></span>
+                                World shifts to high-contrast monochrome
+                            </li>
+                            <li class="flex items-center gap-2">
+                                <span class="w-1 h-1 bg-white/40 rounded-full"></span>
+                                Correct paths glow with ethereal light
+                            </li>
+                            <li class="flex items-center gap-2">
+                                <span class="w-1 h-1 bg-white/40 rounded-full"></span>
+                                Whispered voices grow desperate as time runs out
+                            </li>
+                        </ul>
+                    </div>
+                    
+                    <div class="mt-8 pt-6 border-t border-white/10 text-xs text-center opacity-40 tracking-widest">
+                        SINGLE USE • IRREVERSIBLE
+                    </div>
+                </div>
+
+                <!-- Fractured Mask -->
+                <div class="mask-card mask-fractured p-8 md:p-12 flex flex-col h-full group">
+                    <div class="mb-8 relative">
+                        <div class="w-24 h-24 mx-auto rounded-full border border-red-900/30 flex items-center justify-center relative overflow-hidden bg-gradient-to-b from-red-900/10 to-transparent">
+                            <div class="absolute inset-0 bg-red-900/20 translate-y-full group-hover:translate-y-0 transition-transform duration-500"></div>
+                            <svg class="w-10 h-10 opacity-80 relative z-10" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1" d="M4 8V4m0 0h4M4 4l5 5m11-1V4m0 0h-4m4 0l-5 5M4 16v4m0 0h4m-4 0l5-5m11 5l-5-5m5 5v-4m0 4h-4"/>
+                            </svg>
+                        </div>
+                        <div class="absolute -bottom-2 left-1/2 -translate-x-1/2 text-[10px] tracking-widest opacity-40">FORM</div>
+                    </div>
+                    
+                    <h3 class="font-display text-3xl mb-4 text-center text-red-100/80">The Fractured Mask</h3>
+                    <div class="w-12 h-px bg-red-900/30 mx-auto mb-6"></div>
+                    
+                    <div class="flex-1 space-y-4 text-sm leading-relaxed opacity-80">
+                        <p class="italic text-red-200/40 text-center mb-4">"If I don't face it directly..."</p>
+                        <p>Allows <span class="text-red-200/80">PHASE</span> through one sealed door, wall, or barrier for 15 seconds.</p>
+                        <ul class="space-y-2 text-xs opacity-60 mt-4">
+                            <li class="flex items-center gap-2">
+                                <span class="w-1 h-1 bg-red-400/40 rounded-full"></span>
+                                Hands become translucent
+                            </li>
+                            <li class="flex items-center gap-2">
+                                <span class="w-1 h-1 bg-red-400/40 rounded-full"></span>
+                                Ghostly double-image effect
+                            </li>
+                            <li class="flex items-center gap-2">
+                                <span class="w-1 h-1 bg-red-400/40 rounded-full"></span>
+                                Reality tears with crackling static
+                            </li>
+                        </ul>
+                    </div>
+                    
+                    <div class="mt-8 pt-6 border-t border-red-900/20 text-xs text-center opacity-40 tracking-widest">
+                        SINGLE USE • IRREVERSIBLE
+                    </div>
+                </div>
+
+                <!-- Wailing Mask -->
+                <div class="mask-card mask-wailing p-8 md:p-12 flex flex-col h-full group">
+                    <div class="mb-8 relative">
+                        <div class="w-24 h-24 mx-auto rounded-full border border-blue-900/30 flex items-center justify-center relative overflow-hidden bg-gradient-to-b from-blue-900/10 to-transparent">
+                            <div class="absolute inset-0 bg-blue-900/20 translate-y-full group-hover:translate-y-0 transition-transform duration-500"></div>
+                            <svg class="w-10 h-10 opacity-80 relative z-10" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1" d="M5.586 15H4a1 1 0 01-1-1v-4a1 1 0 011-1h1.586l4.707-4.707C10.923 3.663 12 4.109 12 5v14c0 .891-1.077 1.337-1.707.707L5.586 15z"/>
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1" d="M17 14l2-2m0 0l2-2m-2 2l-2-2m2 2l2 2"/>
+                            </svg>
+                        </div>
+                        <div class="absolute -bottom-2 left-1/2 -translate-x-1/2 text-[10px] tracking-widest opacity-40">SILENCE</div>
+                    </div>
+                    
+                    <h3 class="font-display text-3xl mb-4 text-center text-blue-100/80">The Wailing Mask</h3>
+                    <div class="w-12 h-px bg-blue-900/30 mx-auto mb-6"></div>
+                    
+                    <div class="flex-1 space-y-4 text-sm leading-relaxed opacity-80">
+                        <p class="italic text-blue-200/40 text-center mb-4">"If I make no sound..."</p>
+                        <p>Creates absolute <span class="text-blue-200/80">SILENCE</span>. Sound triggers no reactions. The maze cannot hear you.</p>
+                        <ul class="space-y-2 text-xs opacity-60 mt-4">
+                            <li class="flex items-center gap-2">
+                                <span class="w-1 h-1 bg-blue-400/40 rounded-full"></span>
+                                Scream cuts to absolute void
+                            </li>
+                            <li class="flex items-center gap-2">
+                                <span class="w-1 h-1 bg-blue-400/40 rounded-full"></span>
+                                Only heartbeat remains, growing louder
+                            </li>
+                            <li class="flex items-center gap-2">
+                                <span class="w-1 h-1 bg-blue-400/40 rounded-full"></span>
+                                Sound floods back disorientingly
+                            </li>
+                        </ul>
+                    </div>
+                    
+                    <div class="mt-8 pt-6 border-t border-blue-900/20 text-xs text-center opacity-40 tracking-widest">
+                        SINGLE USE • IRREVERSIBLE
+                    </div>
+                </div>
+            </div>
+
+            <!-- Warning -->
+            <div class="mt-16 text-center">
+                <p class="text-xs tracking-[0.3em] uppercase opacity-40 max-w-2xl mx-auto">
+                    Warning: Using a mask at the wrong moment traps you forever. The maze remembers.
+                </p>
+            </div>
+        </div>
+    </section>
+
+    <!-- Gameplay Section -->
+    <section class="relative py-32 px-6 bg-black/80">
+        <div class="max-w-5xl mx-auto">
+            <div class="grid md:grid-cols-2 gap-16 items-center">
+                <div class="order-2 md:order-1 relative h-96 border border-white/10 bg-gradient-to-b from-white/5 to-transparent p-8 overflow-hidden">
+                    <!-- Visual representation of the maze -->
+                    <div class="absolute inset-0 opacity-20">
+                        <div class="absolute top-1/4 left-1/4 w-px h-32 bg-white/30"></div>
+                        <div class="absolute top-1/4 left-1/4 w-32 h-px bg-white/30"></div>
+                        <div class="absolute top-1/2 right-1/4 w-px h-48 bg-white/20"></div>
+                        <div class="absolute bottom-1/4 left-1/3 w-24 h-px bg-white/20"></div>
+                    </div>
+                    <div class="relative z-10 h-full flex items-center justify-center">
+                        <div class="text-center space-y-4">
+                            <div class="flex justify-center gap-1 h-12 items-end" id="audio-viz">
+                                <!-- Audio bars generated by JS -->
+                            </div>
+                            <p class="text-[10px] tracking-widest opacity-40 uppercase">Ambient Telemetry</p>
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="order-1 md:order-2 space-y-8">
+                    <h2 class="font-display text-4xl md:text-5xl">Irreversible Choice</h2>
+                    <div class="space-y-4 text-sm leading-loose opacity-80 font-light">
+                        <p>
+                            Every mask worn is permanently lost. The game features three distinct acts, each with increasing psychological tension.
+                        </p>
+                        <div class="space-y-3 pt-4">
+                            <div class="flex items-start gap-4">
+                                <span class="text-xs font-display text-white/40 mt-1">01</span>
+                                <div>
+                                    <h4 class="text-white/90 mb-1">The Threshold</h4>
+                                    <p class="text-xs opacity-60">Clean corridors that degrade. Temptation to use masks early.</p>
+                                </div>
+                            </div>
+                            <div class="flex items-start gap-4">
+                                <span class="text-xs font-display text-white/40 mt-1">02</span>
+                                <div>
+                                    <h4 class="text-white/90 mb-1">The Deep Maze</h4>
+                                    <p class="text-xs opacity-60">Two mandatory mask uses required. Poor choices result in permanent softlock.</p>
+                                </div>
+                            </div>
+                            <div class="flex items-start gap-4">
+                                <span class="text-xs font-display text-white/40 mt-1">03</span>
+                                <div>
+                                    <h4 class="text-white/90 mb-1">The Escape</h4>
+                                    <p class="text-xs opacity-60">Final gauntlet. The maze fights back. One mask remains mandatory.</p>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Download/CTA Section -->
+    <section class="relative py-48 px-6 flex items-center justify-center">
+        <div class="absolute inset-0 bg-gradient-to-t from-black via-transparent to-black"></div>
+        
+        <div class="relative z-10 text-center max-w-3xl mx-auto space-y-8">
+            <h2 class="font-display text-5xl md:text-7xl mb-8">Face the Truth</h2>
+            <p class="text-lg opacity-60 font-light mb-12">
+                The masks remember their creators. Will you wear the wrong face?
+            </p>
+            
+            <div class="flex flex-col items-center gap-6">
+                <a href="https://github.com/Vishesh1305/Unmasked" target="_blank" 
+                   class="group relative inline-flex items-center gap-4 px-12 py-6 bg-white/5 border border-white/20 hover:bg-white/10 hover:border-white/40 transition-all duration-500 overflow-hidden">
+                    <span class="relative z-10 text-sm tracking-[0.3em] uppercase font-medium">View Source on GitHub</span>
+                    <svg class="w-5 h-5 relative z-10 group-hover:translate-x-1 transition-transform" fill="currentColor" viewBox="0 0 24 24">
+                        <path d="M12 0c-6.626 0-12 5.373-12 12 0 5.302 3.438 9.8 8.207 11.387.599.111.793-.261.793-.577v-2.234c-3.338.726-4.033-1.416-4.033-1.416-.546-1.387-1.333-1.756-1.333-1.756-1.089-.745.083-.729.083-.729 1.205.084 1.839 1.237 1.839 1.237 1.07 1.834 2.807 1.304 3.492.997.107-.775.418-1.305.762-1.604-2.665-.305-5.467-1.334-5.467-5.931 0-1.311.469-2.381 1.236-3.221-.124-.303-.535-1.524.117-3.176 0 0 1.008-.322 3.301 1.23.957-.266 1.983-.399 3.003-.404 1.02.005 2.047.138 3.006.404 2.291-1.552 3.297-1.23 3.297-1.23.653 1.653.242 2.874.118 3.176.77.84 1.235 1.911 1.235 3.221 0 4.609-2.807 5.624-5.479 5.921.43.372.823 1.102.823 2.222v3.293c0 .319.192.694.801.576 4.765-1.589 8.199-6.086 8.199-11.386 0-6.627-5.373-12-12-12z"/>
+                    </svg>
+                    <div class="absolute inset-0 bg-gradient-to-r from-transparent via-white/5 to-transparent -translate-x-full group-hover:translate-x-full transition-transform duration-1000"></div>
+                </a>
+                
+                <p class="text-xs opacity-30 tracking-widest mt-8">
+                    Unreal Engine 5 • Global Game Jam 2026 • Psychological Horror
+                </p>
+            </div>
+        </div>
+    </section>
+
+    <!-- Footer -->
+    <footer class="relative py-12 px-6 border-t border-white/5">
+        <div class="max-w-6xl mx-auto flex flex-col md:flex-row justify-between items-center gap-4">
+            <div class="text-xs opacity-40 tracking-widest">
+                DISCHARGED — CONDITION: UNSTABLE
+            </div>
+            <div class="flex gap-6 text-xs opacity-40">
+                <span>10-15 Minutes</span>
+                <span>•</span>
+                <span>Single Player</span>
+                <span>•</span>
+                <span>First-Person</span>
+            </div>
+        </div>
+    </footer>
+
+    <script>
+        // Initialize GSAP
+        gsap.registerPlugin(ScrollTrigger);
+
+        // Custom Cursor
+        const cursor = document.querySelector('.cursor');
+        const cursorFollower = document.querySelector('.cursor-follower');
+        
+        document.addEventListener('mousemove', (e) => {
+            gsap.to(cursor, {
+                x: e.clientX - 10,
+                y: e.clientY - 10,
+                duration: 0.1
+            });
+            gsap.to(cursorFollower, {
+                x: e.clientX - 20,
+                y: e.clientY - 20,
+                duration: 0.3
+            });
+        });
+
+        document.addEventListener('mousedown', () => {
+            cursor.style.transform = 'scale(0.8)';
+        });
+
+        document.addEventListener('mouseup', () => {
+            cursor.style.transform = 'scale(1)';
+        });
+
+        // Dust Particles
+        const dustContainer = document.getElementById('dust-container');
+        for (let i = 0; i < 50; i++) {
+            const dust = document.createElement('div');
+            dust.className = 'dust';
+            dust.style.left = Math.random() * 100 + '%';
+            dust.style.top = Math.random() * 100 + '%';
+            dust.style.animationDelay = Math.random() * 10 + 's';
+            dust.style.animationDuration = (10 + Math.random() * 10) + 's';
+            dustContainer.appendChild(dust);
+        }
+
+        // Text Reveal Animation
+        const revealTexts = document.querySelectorAll('.reveal-text');
+        revealTexts.forEach(text => {
+            const content = text.textContent;
+            text.innerHTML = '';
+            content.split('').forEach((char, i) => {
+                const span = document.createElement('span');
+                span.className = 'char';
+                span.textContent = char === ' ' ? '\u00A0' : char;
+                span.style.transitionDelay = (i * 0.03) + 's';
+                text.appendChild(span);
+            });
+        });
+
+        // Scroll Trigger for text reveals
+        ScrollTrigger.batch('.reveal-text .char', {
+            onEnter: chars => gsap.to(chars, {opacity: 1, y: 0, stagger: 0.01}),
+            start: 'top 80%'
+        });
+
+        // Parallax for mask cards
+        gsap.utils.toArray('.mask-card').forEach((card, i) => {
+            gsap.from(card, {
+                scrollTrigger: {
+                    trigger: card,
+                    start: 'top 85%',
+                    toggleActions: 'play none none reverse'
+                },
+                y: 100,
+                opacity: 0,
+                duration: 1,
+                delay: i * 0.2,
+                ease: 'power3.out'
+            });
+        });
+
+        // Audio Visualizer Simulation
+        const audioViz = document.getElementById('audio-viz');
+        for (let i = 0; i < 8; i++) {
+            const bar = document.createElement('div');
+            bar.className = 'audio-bar';
+            bar.style.animationDelay = (i * 0.1) + 's';
+            bar.style.height = (10 + Math.random() * 30) + 'px';
+            audioViz.appendChild(bar);
+        }
+
+        // Glitch effect randomization
+        setInterval(() => {
+            const glitch = document.querySelector('.glitch');
+            if (Math.random() > 0.95) {
+                glitch.style.animation = 'none';
+                setTimeout(() => {
+                    glitch.style.animation = '';
+                }, 100);
+            }
+        }, 3000);
+
+        // Breathing speed modification based on scroll
+        let lastScroll = 0;
+        window.addEventListener('scroll', () => {
+            const currentScroll = window.pageYOffset;
+            const speed = Math.abs(currentScroll - lastScroll);
+            const breathElements = document.querySelectorAll('.breathing');
+            
+            breathElements.forEach(el => {
+                el.style.animationDuration = Math.max(4, 8 - speed * 0.1) + 's';
+            });
+            
+            lastScroll = currentScroll;
+        });
+
+        // Magnetic effect on mask cards
+        document.querySelectorAll('.mask-card').forEach(card => {
+            card.addEventListener('mousemove', (e) => {
+                const rect = card.getBoundingClientRect();
+                const x = e.clientX - rect.left - rect.width / 2;
+                const y = e.clientY - rect.top - rect.height / 2;
+                
+                gsap.to(card, {
+                    x: x * 0.05,
+                    y: y * 0.05,
+                    duration: 0.3,
+                    ease: 'power2.out'
+                });
+            });
+            
+            card.addEventListener('mouseleave', () => {
+                gsap.to(card, {
+                    x: 0,
+                    y: 0,
+                    duration: 0.5,
+                    ease: 'elastic.out(1, 0.5)'
+                });
+            });
+        });
+
+        // Smooth scroll for navigation
+        document.querySelectorAll('a[href^="#"]').forEach(anchor => {
+            anchor.addEventListener('click', function (e) {
+                e.preventDefault();
+                const target = document.querySelector(this.getAttribute('href'));
+                if (target) {
+                    target.scrollIntoView({ behavior: 'smooth', block: 'start' });
+                }
+            });
+        });
+    </script>
+</body>
+</html>
