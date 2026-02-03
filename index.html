@@ -7,6 +7,7 @@
     <script src="https://cdn.tailwindcss.com"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.2/gsap.min.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.2/ScrollTrigger.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js"></script>
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,300;0,400;0,600;1,400&family=Inter:wght@200;300;400;500&display=swap" rel="stylesheet">
@@ -181,6 +182,55 @@
         .mask-fractured:hover { border-color: rgba(138, 0, 0, 0.5); box-shadow: 0 0 30px rgba(138,0,0,0.2); }
         .mask-wailing:hover { border-color: rgba(20, 20, 50, 0.5); box-shadow: 0 0 30px rgba(20,20,50,0.2); }
 
+        /* Team Card Styles */
+        .team-card {
+            background: linear-gradient(135deg, rgba(26,26,26,0.6) 0%, rgba(10,10,10,0.8) 100%);
+            border: 1px solid rgba(224, 224, 208, 0.1);
+            transition: all 0.5s cubic-bezier(0.4, 0, 0.2, 1);
+            position: relative;
+            overflow: hidden;
+        }
+
+        .team-card::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: -100%;
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(90deg, transparent, rgba(255,255,255,0.03), transparent);
+            transition: left 0.7s;
+        }
+
+        .team-card:hover::before {
+            left: 100%;
+        }
+
+        .team-card:hover {
+            border-color: rgba(224, 224, 208, 0.3);
+            transform: translateY(-8px);
+            box-shadow: 0 25px 50px rgba(0,0,0,0.9);
+        }
+
+        .team-card.center:hover { border-color: rgba(212, 175, 55, 0.4); box-shadow: 0 0 40px rgba(212,175,55,0.15); }
+        .team-card.left:hover { border-color: rgba(138, 43, 226, 0.4); box-shadow: 0 0 40px rgba(138,43,226,0.1); }
+        .team-card.right:hover { border-color: rgba(0, 191, 255, 0.4); box-shadow: 0 0 40px rgba(0,191,255,0.1); }
+
+        /* QR Code Container */
+        .qr-container {
+            background: white;
+            padding: 12px;
+            border-radius: 8px;
+            display: inline-block;
+            margin-top: 1.5rem;
+            transition: all 0.3s ease;
+        }
+
+        .qr-container:hover {
+            transform: scale(1.05);
+            box-shadow: 0 0 20px rgba(255,255,255,0.1);
+        }
+
         /* Text Reveal */
         .reveal-text {
             clip-path: polygon(0 0, 100% 0, 100% 100%, 0% 100%);
@@ -270,6 +320,19 @@
             0%, 100% { height: 10px; opacity: 0.3; }
             50% { height: 40px; opacity: 0.8; }
         }
+
+        /* Role Badge */
+        .role-badge {
+            font-size: 0.65rem;
+            letter-spacing: 0.15em;
+            text-transform: uppercase;
+            opacity: 0.6;
+            padding: 4px 12px;
+            border: 1px solid rgba(255,255,255,0.2);
+            border-radius: 20px;
+            display: inline-block;
+            margin-bottom: 1rem;
+        }
     </style>
 </head>
 <body class="antialiased selection:bg-white/20 selection:text-white">
@@ -290,6 +353,7 @@
         <div class="flex gap-8 text-xs tracking-widest uppercase">
             <a href="#masks" class="hover:text-white/50 transition-colors">The Masks</a>
             <a href="#truth" class="hover:text-white/50 transition-colors">The Truth</a>
+            <a href="#team" class="hover:text-white/50 transition-colors">Team</a>
             <a href="https://github.com/Vishesh1305/Unmasked" target="_blank" class="hover:text-white/50 transition-colors flex items-center gap-2">
                 <span>GitHub</span>
                 <svg class="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 6H6a2 2 0 00-2 2v10a2 2 0 002 2h10a2 2 0 002-2v-4M14 4h6m0 0v6m0-6L10 14"/></svg>
@@ -623,6 +687,108 @@
         </div>
     </section>
 
+    <!-- Team Section -->
+    <section id="team" class="relative py-32 px-6 bg-gradient-to-b from-black via-gray-950 to-black">
+        <div class="max-w-7xl mx-auto">
+            <div class="text-center mb-20">
+                <h2 class="font-display text-5xl md:text-7xl mb-6">The Architects</h2>
+                <p class="text-sm tracking-[0.3em] uppercase opacity-60 max-w-2xl mx-auto">
+                    Those who built the maze. Those who escaped it.
+                </p>
+            </div>
+
+            <!-- Order: Jiya (Left), Darshan (Center - elevated), Vishesh (Right) -->
+            <div class="grid md:grid-cols-3 gap-8 items-end max-w-6xl mx-auto">
+                
+                <!-- Jiya - Left -->
+                <div class="team-card left p-8 md:p-10 flex flex-col h-full text-center group">
+                    <div class="mb-6 relative">
+                        <div class="w-28 h-28 mx-auto rounded-full border-2 border-purple-500/30 flex items-center justify-center relative overflow-hidden bg-gradient-to-b from-purple-950/20 to-transparent group-hover:border-purple-500/60 transition-colors">
+                            <svg class="w-12 h-12 opacity-60 text-purple-300" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1" d="M12 6V4m0 2a2 2 0 100 4m0-4a2 2 0 110 4m-6 8a2 2 0 100-4m0 4a2 2 0 110-4m0 4v2m0-6V4m6 6v10m6-2a2 2 0 100-4m0 4a2 2 0 110-4m0 4v2m0-6V4"/>
+                            </svg>
+                        </div>
+                        <div class="absolute -bottom-1 left-1/2 -translate-x-1/2 text-[10px] tracking-widest opacity-40 bg-black px-2">GENERALIST</div>
+                    </div>
+                    
+                    <span class="role-badge border-purple-500/30 text-purple-200">Tech & Art</span>
+                    
+                    <h3 class="font-display text-3xl mb-3 text-purple-100">Jiya</h3>
+                    <div class="w-16 h-px bg-purple-500/30 mx-auto mb-4"></div>
+                    
+                    <p class="text-sm leading-relaxed opacity-70 mb-6 flex-1">
+                        Bridging the gap between code and canvas. Shaping both the technical architecture and visual identity of the containment.
+                    </p>
+                    
+                    <div class="qr-container" id="qr-jiya">
+                        <!-- QR Code will be generated here -->
+                    </div>
+                    <p class="text-[10px] tracking-widest opacity-40 mt-3 uppercase">Scan to Connect</p>
+                </div>
+
+                <!-- Darshan - Center (Elevated) -->
+                <div class="team-card center p-10 md:p-12 flex flex-col h-full text-center group md:-translate-y-8 border-yellow-600/20">
+                    <div class="mb-6 relative">
+                        <div class="w-32 h-32 mx-auto rounded-full border-2 border-yellow-600/40 flex items-center justify-center relative overflow-hidden bg-gradient-to-b from-yellow-950/30 to-transparent group-hover:border-yellow-500/70 transition-colors shadow-2xl shadow-yellow-900/20">
+                            <svg class="w-14 h-14 opacity-80 text-yellow-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1" d="M9.663 17h4.673M12 3v1m6.364 1.636l-.707.707M21 12h-1M4 12H3m3.343-5.657l-.707-.707m2.828 9.9a5 5 0 117.072 0l-.548.547A3.374 3.374 0 0014 18.469V19a2 2 0 11-4 0v-.531c0-.895-.356-1.754-.988-2.386l-.548-.547z"/>
+                            </svg>
+                        </div>
+                        <div class="absolute -bottom-1 left-1/2 -translate-x-1/2 text-[10px] tracking-widest opacity-60 bg-black px-2 text-yellow-500">LEAD</div>
+                    </div>
+                    
+                    <span class="role-badge border-yellow-600/40 text-yellow-400">Project Lead & Art Director</span>
+                    
+                    <h3 class="font-display text-4xl mb-3 text-yellow-100">Darshan</h3>
+                    <div class="w-20 h-px bg-yellow-600/40 mx-auto mb-4"></div>
+                    
+                    <p class="text-sm leading-relaxed opacity-80 mb-6 flex-1">
+                        Visionary architect of the maze. Directing the psychological horror aesthetic and guiding the team through the labyrinth of development.
+                    </p>
+                    
+                    <div class="qr-container" id="qr-darshan">
+                        <!-- QR Code will be generated here -->
+                    </div>
+                    <p class="text-[10px] tracking-widest opacity-50 mt-3 uppercase text-yellow-600/70">Scan to Connect</p>
+                </div>
+
+                <!-- Vishesh - Right -->
+                <div class="team-card right p-8 md:p-10 flex flex-col h-full text-center group">
+                    <div class="mb-6 relative">
+                        <div class="w-28 h-28 mx-auto rounded-full border-2 border-cyan-500/30 flex items-center justify-center relative overflow-hidden bg-gradient-to-b from-cyan-950/20 to-transparent group-hover:border-cyan-500/60 transition-colors">
+                            <svg class="w-12 h-12 opacity-60 text-cyan-300" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1" d="M10 20l4-16m4 4l4 4-4 4M6 16l-4-4 4-4"/>
+                            </svg>
+                        </div>
+                        <div class="absolute -bottom-1 left-1/2 -translate-x-1/2 text-[10px] tracking-widest opacity-40 bg-black px-2">DIRECTOR</div>
+                    </div>
+                    
+                    <span class="role-badge border-cyan-500/30 text-cyan-200">Lead Programmer & Technical Director</span>
+                    
+                    <h3 class="font-display text-3xl mb-3 text-cyan-100">Vishesh</h3>
+                    <div class="w-16 h-px bg-cyan-500/30 mx-auto mb-4"></div>
+                    
+                    <p class="text-sm leading-relaxed opacity-70 mb-6 flex-1">
+                        Master of the systems that bind. Engineering the impossible geometry and the mask mechanics that define the experience.
+                    </p>
+                    
+                    <div class="qr-container" id="qr-vishesh">
+                        <!-- QR Code will be generated here -->
+                    </div>
+                    <p class="text-[10px] tracking-widest opacity-40 mt-3 uppercase">Scan to Connect</p>
+                </div>
+
+            </div>
+
+            <!-- Footer Note -->
+            <div class="mt-20 text-center">
+                <p class="text-xs tracking-[0.3em] uppercase opacity-30">
+                    Global Game Jam 2026 • Built in 48 Hours
+                </p>
+            </div>
+        </div>
+    </section>
+
     <!-- Footer -->
     <footer class="relative py-12 px-6 border-t border-white/5">
         <div class="max-w-6xl mx-auto flex flex-col md:flex-row justify-between items-center gap-4">
@@ -716,6 +882,22 @@
             });
         });
 
+        // Team cards animation
+        gsap.utils.toArray('.team-card').forEach((card, i) => {
+            gsap.from(card, {
+                scrollTrigger: {
+                    trigger: card,
+                    start: 'top 85%',
+                    toggleActions: 'play none none reverse'
+                },
+                y: 80,
+                opacity: 0,
+                duration: 1,
+                delay: i * 0.15,
+                ease: 'power3.out'
+            });
+        });
+
         // Audio Visualizer Simulation
         const audioViz = document.getElementById('audio-viz');
         for (let i = 0; i < 8; i++) {
@@ -775,6 +957,30 @@
                 });
             });
         });
+
+        // QR Code Generation - REPLACE THESE URLs WITH ACTUAL SOCIAL LINKS
+        function generateQRCode(elementId, url) {
+            const container = document.getElementById(elementId);
+            if (container) {
+                // Clear previous content
+                container.innerHTML = '';
+                
+                // Create QR code
+                new QRCode(container, {
+                    text: url,
+                    width: 100,
+                    height: 100,
+                    colorDark: "#000000",
+                    colorLight: "#ffffff",
+                    correctLevel: QRCode.CorrectLevel.M
+                });
+            }
+        }
+
+        // Generate QR codes with placeholder URLs - REPLACE THESE
+        generateQRCode('qr-jiya', 'YOUR_JIYA_LINK_HERE');      // Replace with Jiya's social/website
+        generateQRCode('qr-darshan', 'YOUR_DARSHAN_LINK_HERE'); // Replace with Darshan's social/website  
+        generateQRCode('qr-vishesh', 'YOUR_VISHESH_LINK_HERE'); // Replace with Vishesh's social/website
 
         // Smooth scroll for navigation
         document.querySelectorAll('a[href^="#"]').forEach(anchor => {
